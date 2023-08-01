@@ -1,0 +1,5 @@
+{
+    "sketch": "./dev/car/car.ino",
+    "board": "arduino:avr:uno",
+    "port": "COM3"
+}
