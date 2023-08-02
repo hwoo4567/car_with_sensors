@@ -1,15 +1,11 @@
-#include <Arduino.h>
 #include "motor.h"
+#include <AFMotor.h>
 
 AF_DCMotor* motor_l;
 AF_DCMotor* motor_r;
 
 uint8_t speed_l = MOTOR_SPEED;
 uint8_t speed_r = MOTOR_SPEED;
-
-void motorInit(uint8_t l_num, uint8_t r_num) {
-    motorInit(l_num, r_num, 0);
-}
 
 void motorInit(uint8_t l_num, uint8_t r_num, uint8_t line_trance_sensor_pin) {
     motor_l = new AF_DCMotor(l_num);
@@ -19,6 +15,10 @@ void motorInit(uint8_t l_num, uint8_t r_num, uint8_t line_trance_sensor_pin) {
     motor_r->setSpeed(MOTOR_SPEED);
     motor_l->run(RELEASE);
     motor_r->run(RELEASE);
+}
+
+void motorInit(uint8_t l_num, uint8_t r_num) {
+    motorInit(l_num, r_num, 0);
 }
 
 void motorStop() {

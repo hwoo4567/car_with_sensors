@@ -7,7 +7,7 @@
                 "C:/Users/hwoo/AppData/Local/Arduino15/packages/arduino/hardware/avr/1.8.6/cores/arduino/Arduino.h"
             ],
             "includePath": [
-                "${workspaceRoot}",
+                "${workspaceRoot}/**",
                 "C:/Program Files (x86)/Arduino/hardware",
                 "C:/Program Files (x86)/Arduino/libraries",
                 "C:/Users/hwoo/Documents/Arduino/libraries/**",
@@ -17,7 +17,7 @@
             ],
             "browse": {
                 "path": [
-                    "${workspaceRoot}",
+                    "${workspaceRoot}/**",
                     "C:/Program Files (x86)/Arduino/hardware",
                     "C:/Program Files (x86)/Arduino/libraries",
                     "C:/Users/hwoo/Documents/Arduino/libraries/**",

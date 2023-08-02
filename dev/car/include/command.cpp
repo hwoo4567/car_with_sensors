@@ -1,8 +1,8 @@
-#include <Timer.h>
 #include "command.h"
-#include "motor.h"
+#include "motor/motor.h"
+#include "sensor/sensor.h"
+#include <AFMotor.h>
 
-Timer* main_timer = nullptr;
 int* prevMoveCmdId = nullptr;
 
 // *******************************************
@@ -65,6 +65,7 @@ uint16_t sensor(String args[]) {
 
 // *******************************************
 
+//* Command initialization must be called first among other init functions
 void commandInit(Timer* timer) {
     main_timer = timer;
     main_timer->every(100, motorAdjust);
@@ -94,7 +95,7 @@ void runCommand(Cmd cmd, String args[]) {
     }
 }
 
-Cmd toCommand(const char* input) {
+Cmd _charToCmd(const char* input) {
     if (strcmp(input, "stop") == 0) {
         return Cmd::Stop;
     }
@@ -124,7 +125,7 @@ void runString(String command_string) {
     command_char[command_string.length()] = '\0';
     
     char* arg = strtok(command_char, sep);
-    command = toCommand(arg);
+    command = _charToCmd(arg);
     arg = strtok(NULL, sep);  // next: args...
 
     while (arg != NULL) {

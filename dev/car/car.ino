@@ -1,13 +1,14 @@
 #include <Timer.h>
 #include <SoftwareSerial.h>
-#include "command/command.h"
-#include "command/motor.h"
+#include "include/command.h"
+#include "include/motor/motor.h"
 
 #define TEST_LIGHT
 // #define TEST_DRIVE
 
 const uint8_t pinRx = A4;
 const uint8_t pinTx = A5;
+
 SoftwareSerial BTSerial(pinTx, pinRx);  // (bluetoothRx, bluetoothTx)
 Timer timer;
 
