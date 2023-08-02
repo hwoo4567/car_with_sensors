@@ -8,7 +8,7 @@ pip install bleak
 from bluetooth import *
 import asyncio
 
-address = "98:DA:60:08:7E:10"
+address = "00:22:09:01:FE:87"
 
 async def main_async():
     while True:

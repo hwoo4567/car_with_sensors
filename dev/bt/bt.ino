@@ -1,36 +1,33 @@
 #include <SoftwareSerial.h>
 
-const byte led = 13;
+const uint8_t txPin = 7;
+const uint8_t rxPin = 8;
+SoftwareSerial BTSerial(txPin, rxPin);
 uint16_t count = 0;
-
-SoftwareSerial BTSerial(7, 8);
 
 void setup() {
     BTSerial.begin(9600);
 
-    pinMode(led, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
 
-    digitalWrite(led, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
 }
 
 void loop() {
     if (BTSerial.available()) {
-        char input[128];
-        BTSerial.readBytes(input, 128);
+        String input = BTSerial.readString();
         
-        BTSerial.write(input);
-        
-        // if (input == "on") {
-        //     count++;
-        //     digitalWrite(led, HIGH);
+        if (input == "on") {
+            count++;
+            digitalWrite(LED_BUILTIN, HIGH);
 
-        //     BTSerial.println("Counter Value: aaa");
-        // }
-        // if (input == "off") {
-        //     count++;
-        //     digitalWrite(led, LOW);
+            BTSerial.println("Counter Value: aaa");
+        }
+        if (input == "off") {
+            count++;
+            digitalWrite(LED_BUILTIN, LOW);
 
-        //     BTSerial.println("Counter Value: bbb");
-        // }
+            BTSerial.println("Counter Value: bbb");
+        }
     }
 }
