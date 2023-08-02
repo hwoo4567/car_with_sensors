@@ -88,7 +88,6 @@ void runCommand(Cmd cmd, String args[]) {
     case Sensor:
         sensor(args);
         break;
-
     default:
         break;
     }

@@ -2,8 +2,8 @@
 #define MOTOR_H
 
 #define MOTOR_SPEED    255
-#define LEFT           0
-#define RIGHT          1
+#define LEFT           false
+#define RIGHT          true
 
 #include <AFMotor.h>
 
@@ -19,8 +19,9 @@ void motorInit(uint8_t l_num, uint8_t r_num, motor_inst_func adjustMotorCallback
 void motorInit(uint8_t l_num, uint8_t r_num);
 void motorStop();
 void motorGo(uint8_t cmd);
+void motorSetSpeed(uint8_t l, uint8_t r);
 void motorSetSpeed(uint8_t speed);
-void motorTurn(uint8_t direction);
+void motorTurn(bool direction);
 
 #include "motor.cpp"
 #endif

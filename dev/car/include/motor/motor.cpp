@@ -51,17 +51,23 @@ void motorGo(uint8_t direction) {
     case RELEASE:
         motorStop();
         break;
+    default:
+        break;
     }
 }
 
-void motorSetSpeed(uint8_t speed) {
-    _motor_l->setSpeed(speed);
-    _motor_r->setSpeed(speed);
-    speed_l = speed;
-    speed_r = speed;
+void motorSetSpeed(uint8_t l, uint8_t r) {
+    _motor_l->setSpeed(l);
+    _motor_r->setSpeed(r);
+    speed_l = l;
+    speed_r = r;
 }
 
-void motorTurn(uint8_t direction) {
+void motorSetSpeed(uint8_t speed) {
+    motorSetSpeed(speed);
+}
+
+void motorTurn(bool direction) {
     // Only point turn.
 
     switch (direction) {
@@ -73,8 +79,7 @@ void motorTurn(uint8_t direction) {
         _motor_l->run(FORWARD);
         _motor_r->run(BACKWARD);
         break;
-    case RELEASE:
-        motorStop();
+    default:
         break;
     }
 }
