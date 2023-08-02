@@ -68,7 +68,6 @@ uint16_t sensor(String args[]) {
 //* Command initialization must be called first among other init functions
 void commandInit(Timer* timer) {
     main_timer = timer;
-    main_timer->every(100, motorAdjust);
 }
 
 void runCommand(Cmd cmd, String args[]) {

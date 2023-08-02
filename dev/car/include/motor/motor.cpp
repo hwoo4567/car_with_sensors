@@ -1,40 +1,52 @@
 #include "motor.h"
-#include <AFMotor.h>
 
-AF_DCMotor* motor_l;
-AF_DCMotor* motor_r;
+AF_DCMotor* _motor_l;
+AF_DCMotor* _motor_r;
 
 uint8_t speed_l = MOTOR_SPEED;
 uint8_t speed_r = MOTOR_SPEED;
 
-void motorInit(uint8_t l_num, uint8_t r_num, uint8_t line_trance_sensor_pin) {
-    motor_l = new AF_DCMotor(l_num);
-    motor_r = new AF_DCMotor(r_num);
+motor_inst_func _adjustMotorCallback = nullptr;
+void _callback() {
+    _adjustMotorCallback(_motor_l, _motor_r);
+}
 
-    motor_l->setSpeed(MOTOR_SPEED);
-    motor_r->setSpeed(MOTOR_SPEED);
-    motor_l->run(RELEASE);
-    motor_r->run(RELEASE);
+/////////////////////////////////////////////////////////////////////
+
+void motorInit(uint8_t l_num, uint8_t r_num, motor_inst_func adjustMotorCallback) {
+    _motor_l = new AF_DCMotor(l_num);
+    _motor_r = new AF_DCMotor(r_num);
+
+    _motor_l->setSpeed(MOTOR_SPEED);
+    _motor_r->setSpeed(MOTOR_SPEED);
+    _motor_l->run(RELEASE);
+    _motor_r->run(RELEASE);
+
+    _adjustMotorCallback = adjustMotorCallback;
+    
+    if (adjustMotorCallback != nullptr) {
+        main_timer->every(100, _callback);
+    }
 }
 
 void motorInit(uint8_t l_num, uint8_t r_num) {
-    motorInit(l_num, r_num, 0);
+    motorInit(l_num, r_num, (motor_inst_func) nullptr);
 }
 
 void motorStop() {
-    motor_l->run(RELEASE);
-    motor_r->run(RELEASE);
+    _motor_l->run(RELEASE);
+    _motor_r->run(RELEASE);
 }
 
 void motorGo(uint8_t direction) {
     switch (direction) {
     case FORWARD:
-        motor_l->run(FORWARD);
-        motor_r->run(FORWARD);
+        _motor_l->run(FORWARD);
+        _motor_r->run(FORWARD);
         break;
     case BACKWARD:
-        motor_l->run(BACKWARD);
-        motor_r->run(BACKWARD);
+        _motor_l->run(BACKWARD);
+        _motor_r->run(BACKWARD);
         break;
     case RELEASE:
         motorStop();
@@ -43,8 +55,8 @@ void motorGo(uint8_t direction) {
 }
 
 void motorSetSpeed(uint8_t speed) {
-    motor_l->setSpeed(speed);
-    motor_r->setSpeed(speed);
+    _motor_l->setSpeed(speed);
+    _motor_r->setSpeed(speed);
     speed_l = speed;
     speed_r = speed;
 }
@@ -54,19 +66,15 @@ void motorTurn(uint8_t direction) {
 
     switch (direction) {
     case LEFT:
-        motor_l->run(BACKWARD);
-        motor_r->run(FORWARD);
+        _motor_l->run(BACKWARD);
+        _motor_r->run(FORWARD);
         break;
     case RIGHT:
-        motor_l->run(FORWARD);
-        motor_r->run(BACKWARD);
+        _motor_l->run(FORWARD);
+        _motor_r->run(BACKWARD);
         break;
     case RELEASE:
         motorStop();
         break;
     }
-}
-
-void motorAdjust() {
-
 }

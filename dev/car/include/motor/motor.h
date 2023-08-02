@@ -5,7 +5,17 @@
 #define LEFT           0
 #define RIGHT          1
 
-void motorInit(uint8_t l_num, uint8_t r_num, uint8_t line_trance_sensor_pin);
+#include <AFMotor.h>
+
+/*
+Declaration:
+void function_name(AF_DCMotor* motor_l, AF_DCMotor* motor_r) {
+    ...
+}
+*/
+typedef void (*motor_inst_func)(AF_DCMotor* l, AF_DCMotor* r);
+
+void motorInit(uint8_t l_num, uint8_t r_num, motor_inst_func adjustMotorCallback);
 void motorInit(uint8_t l_num, uint8_t r_num);
 void motorStop();
 void motorGo(uint8_t cmd);
