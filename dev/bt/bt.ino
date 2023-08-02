@@ -5,6 +5,8 @@ const uint8_t rxPin = 8;
 SoftwareSerial BTSerial(txPin, rxPin);
 uint16_t count = 0;
 
+// 내가 가지고 있는 HC-06 주소 : "00:22:09:01:FE:87"
+
 void setup() {
     BTSerial.begin(9600);
 
