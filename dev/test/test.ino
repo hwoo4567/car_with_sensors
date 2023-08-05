@@ -1,3 +1,4 @@
+/*
 #define THRESHOLD 700
 
 const uint8_t sensor1 = A0;
@@ -35,4 +36,29 @@ void loop() {
     }
 
     delay(100);
+}
+*/
+
+const uint8_t echoPin = 10;  // servo pin1
+const uint8_t trigPin = 9;  // servo pin2
+
+void setup() {
+	Serial.begin(9600);
+	pinMode(trigPin, OUTPUT);
+	pinMode(echoPin, INPUT);
+}
+
+void loop() {
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+
+    unsigned long duration = pulseIn(echoPin, HIGH); 
+	double distance = ((double) duration) * 17 / 1000; 
+	
+	Serial.print(distance);
+	Serial.println("cm");
+	delay(100);
 }

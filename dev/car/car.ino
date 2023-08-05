@@ -8,16 +8,20 @@
 
 const uint8_t pinRx = A4;
 const uint8_t pinTx = A5;
+const uint8_t echoPin = 10;  // servo pin1
+const uint8_t trigPin = 9;  // servo pin2
 
-SoftwareSerial BTSerial(pinTx, pinRx);  // (bluetoothRx, bluetoothTx)
+SoftwareSerial BtSerial(pinTx, pinRx);  // (bluetoothRx, bluetoothTx)
 Timer timer;
 
 void setup() {
-    motorInit(1, 4);
     commandInit(&timer);
+    motorInit(1, 4);
+    distanceInit(trigPin, echoPin);
+    // lineTraceInit()
 
     Serial.begin(9600);
-    BTSerial.begin(9600);
+    BtSerial.begin(9600);
     
 #ifdef TEST_LIGHT
     pinMode(LED_BUILTIN, OUTPUT);
@@ -39,17 +43,19 @@ void setup() {
 void loop() {
     String bt_input;
 
-    if (BTSerial.available()) {
+    if (BtSerial.available()) {
         Serial.println("Connected");
 
-        bt_input = BTSerial.readString();
+        bt_input = BtSerial.readString();
 
-        BTSerial.print(bt_input.c_str());
+        BtSerial.print(bt_input.c_str());
 
         if (bt_input != "") {
             runString(bt_input);
         }
     }
+
+    Serial.println(getDistance());
 
     timer.update();
 }

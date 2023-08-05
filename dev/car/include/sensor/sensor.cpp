@@ -5,8 +5,8 @@ uint8_t line_l, line_r;
 int _line_l_val, _line_r_val;  // 0 - 1023
 
 // Sensor pins for distance check
-uint8_t trig_pin;
-uint8_t echo_pin;
+uint8_t _trig_pin;
+uint8_t _echo_pin;
 
 double _distance; 
 
@@ -14,16 +14,16 @@ double _distance;
 void _updateDistance() {
     unsigned long duration;
 
-    digitalWrite(trig_pin, LOW);
+    digitalWrite(_trig_pin, LOW);
     delayMicroseconds(2);
 
-    digitalWrite(trig_pin, HIGH);
+    digitalWrite(_trig_pin, HIGH);
     delayMicroseconds(10);
-    digitalWrite(trig_pin, LOW);
+    digitalWrite(_trig_pin, LOW);
 
-    duration = pulseIn(echo_pin, HIGH); 
+    duration = pulseIn(_echo_pin, HIGH); 
 
-    _distance = duration * 17 / 1000;
+    _distance = ((double) duration) * 17.0 * 0.001;
 }
 
 void _updateLineSensors() {
@@ -36,10 +36,10 @@ void _updateLineSensors() {
 // Init functions must be called after commandInit() was called.
 
 void distanceInit(uint8_t trig, uint8_t echo) {
-    trig_pin = trig;
-    echo_pin = echo;
-    pinMode(trig_pin, OUTPUT);
-    pinMode(echo_pin, INPUT);
+    _trig_pin = trig;
+    _echo_pin = echo;
+    pinMode(_trig_pin, OUTPUT);
+    pinMode(_echo_pin, INPUT);
 
     main_timer->every(100, _updateDistance);
 }

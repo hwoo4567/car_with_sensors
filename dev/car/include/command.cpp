@@ -5,7 +5,7 @@
 
 int* prevMoveCmdId = nullptr;
 
-// *******************************************
+/////////////////////////////////////////////////////////////////////
 
 void _stopAll() {
     motorStop();
@@ -63,7 +63,7 @@ uint16_t sensor(String args[]) {
     return 0;
 }
 
-// *******************************************
+/////////////////////////////////////////////////////////////////////
 
 //* Command initialization must be called first among other init functions
 void commandInit(Timer* timer) {
@@ -116,7 +116,7 @@ void runString(String command_string) {
     Cmd command;
     String command_args[MAX_COMMAND_ARG];
     uint8_t i = 0;
-    const char sep[] = " ";
+    const char* sep = " ";
 
     char * command_char = new char[command_string.length() + 1];
     strcpy(command_char, command_string.c_str());
