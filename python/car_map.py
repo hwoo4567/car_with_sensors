@@ -2,13 +2,15 @@ import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import numpy as np
+import socket
+import asyncio
 from tkinter import *
 from tkinter import ttk
 
 
 class AppUI(Frame):
-    def __init__(self, parent: Tk, *args, **kwargs):
-        Frame.__init__(self, parent, *args, **kwargs)
+    def __init__(self, parent: Tk):
+        Frame.__init__(self, parent)
         matplotlib.use("TkAgg")
         
         self.parent = parent
@@ -60,15 +62,44 @@ class AppUI(Frame):
         self.tkcanvas.after(1000, self.movePoint)
         
 class Car:
-    def __init__(self):
-        ...
-        
-    
+    port = 1
 
-def main():
+    def __init__(self, mac_address):
+        self.address = mac_address
+        
+        self.socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+        self.socket.connect((self.address, self.port))
+        
+    async def send(self):
+        msg = input("send message : ")
+        if msg == "quit":
+            self.socket.close()
+        
+        self.socket.send(bytes(msg, 'utf-8'))
+    
+    async def receive(self):
+        data = self.socket.recv(1024).decode("utf-8")
+        print("Received: [%s]" % data.replace("\n", "\\n").replace("\r", "\\r"))
+
+async def appExec():
     root = Tk()
     app = AppUI(root)
     app.pack(fill="both", expand=True)
     root.mainloop()
+
+async def main_async():
+    car1 = Car("")
+    car2 = Car("")
+    car3 = Car("")
+    
+    tasks = [asyncio.create_task(appExec())]
+    for c in (car1, car2, car3):
+        tasks.append(asyncio.create_task(c.receive()))
+        tasks.append(asyncio.create_task(c.send()))
+
+    await asyncio.wait(tasks)
+
 if __name__ == "__main__":
-    main()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main_async())
+    loop.close()
