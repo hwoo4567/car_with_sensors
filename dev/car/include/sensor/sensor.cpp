@@ -1,8 +1,11 @@
 #include "sensor.h"
+#define UPDATE_INTERVAL 100  // ms
 
 // Sensors for line tracing
-uint8_t line_l, line_r;
-int _line_l_val, _line_r_val;  // 0 - 1023
+uint8_t _line_l_pin, _line_r_pin;
+uint8_t _light_sensor;  // light sensor pin
+int _line_l_val, _line_r_val;  // 0 - 1024
+int _light_sensor_val;
 
 // Sensor pins for distance check
 uint8_t _trig_pin;
@@ -27,8 +30,12 @@ void _updateDistance() {
 }
 
 void _updateLineSensors() {
-    _line_l_val = analogRead(line_l);
-    _line_r_val = analogRead(line_r);
+    _line_l_val = analogRead(_line_l_pin);
+    _line_r_val = analogRead(_line_r_pin);
+}
+
+void _updateLightSensor() {
+    _light_sensor_val = analogRead(_light_sensor);
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -41,14 +48,20 @@ void distanceInit(uint8_t trig, uint8_t echo) {
     pinMode(_trig_pin, OUTPUT);
     pinMode(_echo_pin, INPUT);
 
-    main_timer->every(100, _updateDistance);
+    main_timer->every(UPDATE_INTERVAL, _updateDistance);
 }
 
 void lineTraceInit(uint8_t l_pin, uint8_t r_pin) {
-    line_l = l_pin;
-    line_r = r_pin;
+    _line_l_pin = l_pin;
+    _line_r_pin = r_pin;
 
-    main_timer->every(100, _updateLineSensors);
+    main_timer->every(UPDATE_INTERVAL, _updateLineSensors);
+}
+
+void lightInit(uint8_t light_pin) {
+    _light_sensor = light_pin;
+
+    main_timer->every(UPDATE_INTERVAL, _updateLightSensor);
 }
 
 double getDistance() {

@@ -8,6 +8,7 @@
 
 const uint8_t pinRx = A4;
 const uint8_t pinTx = A5;
+// const uint8_t lightPin = A2;
 const uint8_t echoPin = 10;  // servo pin1
 const uint8_t trigPin = 9;  // servo pin2
 
@@ -18,7 +19,8 @@ void setup() {
     commandInit(&timer);
     motorInit(1, 4);
     distanceInit(trigPin, echoPin);
-    // lineTraceInit()
+    // lightInit();
+    // lineTraceInit();
 
     Serial.begin(9600);
     BtSerial.begin(9600);
