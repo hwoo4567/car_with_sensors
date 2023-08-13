@@ -4,16 +4,19 @@ from matplotlib.figure import Figure
 import numpy as np
 import socket
 import asyncio
+import threading
 from tkinter import *
-from tkinter import ttk
 
+# 센서 값을 한 번에 받도록 프로그래밍 하는 것이 좋을 것 같다.
 
 class AppUI(Frame):
     def __init__(self, parent: Tk):
         Frame.__init__(self, parent)
-        matplotlib.use("TkAgg")
+        matplotlib.use("TkAgg", force=True)
         
         self.parent = parent
+        self.points = dict()
+        self.loop_func = None  # loop event
         
         self.initVar()
         self.initUI()
@@ -36,70 +39,162 @@ class AppUI(Frame):
         self.parent.config(menu=self.menu_)
 
         # <main>
-        fig = Figure(figsize=(10, 10), dpi=128)
-        subplt = fig.add_subplot(1, 1, 1)
+        self.start_btn = Button(self, text="Start", command=self.carStart)
+        self.start_btn.pack(side="bottom", fill="both")
         
-        self.canvas = FigureCanvasTkAgg(fig, master=self.parent)
+        fig = Figure(figsize=(10, 10), dpi=128)
+        self.subplt = fig.add_subplot(1, 1, 1)
+        
+        self.canvas = FigureCanvasTkAgg(fig, master=self)
         self.canvas.draw()
         self.tkcanvas = self.canvas.get_tk_widget()
-        self.tkcanvas.pack()
-        self.tkcanvas.after(1000, self.movePoint)
-        
-        self.point, = subplt.plot(0, 1, marker="o")
-        
-        subplt.set_xticks([1, 2, 3, 4, 5])
-        subplt.set_yticks([1, 2, 3, 4, 5])
-        subplt.grid(True)
-        
-    def movePoint(self):
-        x = np.random.sample() * 5
-        y = np.random.random() * 5
-        self.point.set_data([x],[y])
-        
-        print(round(x, 2), round(y, 2))
+        self.tkcanvas.pack(fill="both")
+        self.tkcanvas.after(50, self.updatePoints)
+
+    def updatePoints(self):
+        for k, v in self.points.items():
+            x, y = k.getPos()
+            v.set_data([x],[y])
+            
+        self.subplt.set_xticks([1, 2, 3, 4, 5])
+        self.subplt.set_yticks([1, 2, 3, 4, 5])
+        self.subplt.grid(True)
+
         self.canvas.draw()
         self.tkcanvas.update()
-        self.tkcanvas.after(1000, self.movePoint)
+        self.tkcanvas.after(50, self.updatePoints)
         
+    def createPoint(self, car):
+        point, = self.subplt.plot(0, 0, marker="o")
+        self.points[car] = point
+        print("Point:", car)
+        
+    def carStart(self):
+        self.start_btn.config(bg="gray", command=lambda: ...)
+        for car in self.points.keys():
+            car.startDrive()
+ 
+# 자동차가 항상 위를 보고 있다고 가정   
 class Car:
     port = 1
 
-    def __init__(self, mac_address):
+    def __init__(self, name, mac_address=None):
         self.address = mac_address
+        self._name = name
+        self.driving = False
         
-        self.socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-        self.socket.connect((self.address, self.port))
+        self.x, self.y = 0, 0  # 0 - 5
+        self.dest = 0, 0
+        self.light_sensor = 0.0
+        self.distance = 0.0
         
-    async def send(self):
-        msg = input("send message : ")
-        if msg == "quit":
-            self.socket.close()
+        if mac_address is not None:
+            self.socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+            self.socket.connect((self.address, self.port))
+            self.stop()
         
-        self.socket.send(bytes(msg, 'utf-8'))
+    def setPos(self, x, y):
+        self.x, self.y = x, y
+    def getPos(self):
+        return self.x, self.y
     
-    async def receive(self):
-        data = self.socket.recv(1024).decode("utf-8")
-        print("Received: [%s]" % data.replace("\n", "\\n").replace("\r", "\\r"))
+    @property
+    def name(self):
+        return self._name
+    @name.setter
+    def name(self, name):
+        self._name = name
+    def setDest(self, dest):
+        self.dest = dest
+    def startDrive(self):
+        self.driving = True
+    
+    async def drive(self):
+        print(self.driving)
+        if not self.driving:
+            return
 
-async def appExec():
+        self.go("forward")
+        await asyncio.sleep(5)
+        await asyncio.wait([
+            asyncio.create_task(self.getLightSensor()),
+            asyncio.create_task(self.getDistance()),
+        ])
+        print(self.light_sensor, self.distance)
+
+        self.stop()
+        self.driving = False
+
+    def send(self, msg: str):
+        self.socket.send(bytes(msg, "ascii"))
+    
+    def close(self):
+        self.socket.close()
+
+    def go(self, direction):
+        cmd = f"go {direction}"
+        self.send(cmd)
+    def stop(self):
+        self.send("stop")
+    def turn(self, direction):
+        cmd = f"turn {direction}"
+        self.send(cmd)
+
+    async def receive(self):
+        self.data = ""
+        try:
+            for _ in range(10):
+                self.data += self.socket.recv(1024).decode("ascii")  # 정보를 받을 때까지 대기
+                if "\n" in self.data:
+                    self.data = self.data.replace("\r", "").replace("\n", "")
+                    print("Received:", self.data)
+                    break
+        except UnicodeDecodeError:
+            print("Received: !!Error!!")
+        
+    async def getLightSensor(self):
+        self.send(f"sensor light")
+        await self.receive()
+        self.light_sensor = float(self.data)
+        
+    async def getLineSensor(self):
+        self.send(f"sensor lineL")
+        await self.receive()
+        print("a")
+        self.send(f"sensor lineR")
+        await self.receive()
+        print("b")
+        
+    async def getDistance(self):
+        self.send("sensor distance")
+        await self.receive()
+        self.distance = float(self.data)
+
+async def main_async(*args: Car):
+    while True:
+        await asyncio.wait([
+            asyncio.create_task(car.drive())
+            for car in args
+        ])
+        await asyncio.sleep(1)
+
+def communication():
+    car1 = Car("test car", "00:22:09:01:FE:87")
+    app.createPoint(car1)
+    
+    loop = asyncio.new_event_loop()
+    loop.run_until_complete(main_async(car1))
+    loop.close()
+
+def appExec():
     root = Tk()
+    global app
     app = AppUI(root)
     app.pack(fill="both", expand=True)
     root.mainloop()
 
-async def main_async():
-    car1 = Car("")
-    car2 = Car("")
-    car3 = Car("")
-    
-    tasks = [asyncio.create_task(appExec())]
-    for c in (car1, car2, car3):
-        tasks.append(asyncio.create_task(c.receive()))
-        tasks.append(asyncio.create_task(c.send()))
-
-    await asyncio.wait(tasks)
-
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main_async())
-    loop.close()
+    t1 = threading.Thread(target=communication)
+    t1.daemon = True 
+    t1.start()
+    appExec()

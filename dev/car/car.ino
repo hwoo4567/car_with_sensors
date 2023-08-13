@@ -4,7 +4,7 @@
 #include "include/motor/motor.h"
 
 #define TEST_LIGHT
-// #define TEST_DRIVE
+#define TEST_DRIVE
 
 const uint8_t pinRx = A4;
 const uint8_t pinTx = A5;
@@ -41,23 +41,20 @@ void setup() {
     motorStop();
 #endif
 }
- 
+
 void loop() {
     String bt_input;
+    String response;
 
     if (BtSerial.available()) {
         Serial.println("Connected");
 
         bt_input = BtSerial.readString();
-
-        BtSerial.print(bt_input.c_str());
-
         if (bt_input != "") {
-            runString(bt_input);
+            runString(bt_input, response);
+            BtSerial.println(response);  // 통신 종결자: \n
         }
     }
-
-    Serial.println(getDistance());
 
     timer.update();
 }

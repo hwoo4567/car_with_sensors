@@ -73,3 +73,6 @@ int getLineLSensorVal() {
 int getLineRSensorVal() {
     return _line_r_val;
 }
+int getLightVal() {
+    return _light_sensor_val;
+}

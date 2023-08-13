@@ -59,8 +59,20 @@ void turn(String args[]) {
     }
 }
 
-uint16_t sensor(String args[]) {
-    return 0;
+double sensor(String args[]) {
+    if (args[0] == "light") {
+        return getLightVal();
+    }
+    if (args[0] == "lineL") {
+        return getLineLSensorVal();
+    }
+    if (args[0] == "lineR") {
+        return getLineRSensorVal();
+    }
+    if (args[0] == "distance") {
+        return getDistance();
+    }
+    return 0.0;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -70,7 +82,7 @@ void commandInit(Timer* timer) {
     main_timer = timer;
 }
 
-void runCommand(Cmd cmd, String args[]) {
+void runCommand(Cmd cmd, String args[], String& response) {
     switch (cmd)
     {
     case Stop:
@@ -86,7 +98,8 @@ void runCommand(Cmd cmd, String args[]) {
         turn(args);
         break;
     case Sensor:
-        sensor(args);
+        double value = sensor(args);
+        response = String(value);
         break;
     default:
         break;
@@ -112,11 +125,11 @@ Cmd _charToCmd(const char* input) {
     return Cmd::Null;
 }
 
-void runString(String command_string) {
-    Cmd command;
-    String command_args[MAX_COMMAND_ARG];
-    uint8_t i = 0;
+void runString(String command_string, String& response) {
     const char* sep = " ";
+    String command_args[MAX_COMMAND_ARG];
+    Cmd command;
+    uint8_t i = 0;
 
     char * command_char = new char[command_string.length() + 1];
     strcpy(command_char, command_string.c_str());
@@ -134,5 +147,5 @@ void runString(String command_string) {
 
     delete[] command_char;
 
-    runCommand(command, command_args);
+    runCommand(command, command_args, response);
 }

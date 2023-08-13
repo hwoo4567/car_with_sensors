@@ -9,6 +9,7 @@ void distanceInit(uint8_t trig, uint8_t echo);
 double getDistance();
 int getLineLSensorVal();
 int getLineRSensorVal();
+int getLightVal();
 
 #include "sensor.cpp"
 #endif

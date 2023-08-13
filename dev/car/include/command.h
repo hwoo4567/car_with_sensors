@@ -17,8 +17,8 @@ enum Cmd {
 };
 
 void commandInit(Timer* timer);
-void runCommand(Cmd cmd, String args[]);
-void runString(String command_string);
+void runCommand(Cmd cmd, String args[], String& response);
+void runString(String command_string, String& response);
 
 #include "command.cpp"
 #endif
