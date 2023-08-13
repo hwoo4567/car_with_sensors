@@ -1,7 +1,6 @@
 import matplotlib
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-import numpy as np
 import socket
 import asyncio
 import threading
