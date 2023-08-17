@@ -56,7 +56,6 @@ class Car:
     def getSensor(self):
         self.send("sensor")
         print(self.receive())
-        
     # /////////////////////////////////////////////////////
 
     def receive(self):
@@ -73,13 +72,14 @@ class Car:
         finally:
             return string_data
         
+import random
 def communication():
     car1 = Car("Test Car 1")  # "00:22:09:01:FE:87"
     car2 = Car("Test Car 2")
     car3 = Car("Test Car 3")
-    app.register_car(car1)
-    app.register_car(car2)
-    app.register_car(car3)
+    for car in (car1, car2, car3):
+        car.setPos(random.randint(0, 3), random.randint(0, 3))
+        app.register_car(car)
     
 def appDef():
     global app, root

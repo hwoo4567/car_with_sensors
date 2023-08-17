@@ -116,10 +116,10 @@ class AppUI(Frame):
             self.ax.text(dot_x, dot_y + 0.15, f'({dot_x}, {dot_y})', ha='center', va='bottom', fontsize=16)
         
         # Set limits and labels
-        self.ax.set_xlim(0, 5)
-        self.ax.set_ylim(0, 5)
-        self.ax.set_xticks(range(1, 6))
-        self.ax.set_yticks(range(1, 6))
+        self.ax.set_xlim(0, 3)
+        self.ax.set_ylim(0, 3)
+        self.ax.set_xticks(range(1, 4))
+        self.ax.set_yticks(range(1, 4))
         self.ax.set_aspect('equal')  # Ensure equal aspect ratio
         
         self.ax.set_xlabel('X')
