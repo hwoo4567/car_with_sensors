@@ -1,57 +1,74 @@
-def is_valid_move(grid, x, y):
-    return 0 <= x < len(grid) and 0 <= y < len(grid[0])
+from itertools import permutations
 
-def get_possible_moves(x, y):
-    moves = [
-        (x + 1, y), (x - 1, y),
-        (x, y + 1), (x, y - 1),
-        (x, y)  # Turn left
-    ]
-    return moves
-
-def find_path(grid, start, end):
-    visited = set()
-    queue = [(start, [])]
-
-    while queue:
-        (x, y), path = queue.pop(0)
-
-        if (x, y) == end:
-            return path
-
-        if (x, y) not in visited:
-            visited.add((x, y))
-
-            for new_x, new_y in get_possible_moves(x, y):
-                if is_valid_move(grid, new_x, new_y) and (new_x, new_y) not in visited:
-                    queue.append(((new_x, new_y), path + [(new_x, new_y)]))
-
-    return None  # No path found
-
-def find_ideal_paths(grid, start_points, end_points):
-    paths = []
+def dir_changed(now, next):
+    r = "neswn"
     
-    for start, end in zip(start_points, end_points):
-        path = find_path(grid, start, end)
-        if path is None:
-            return None  # No valid path found
+    if r.find(now + next) != -1:
+        return "r90"
+    elif r[::-1].find(now + next) != -1:
+        return "l90"
+    else:
+        return None
+
+def add_direction(lst):
+    result = []
+    
+    for idx, item in enumerate(lst):
+        result.append(item)
+        try:
+            next = lst[idx + 1]
+            dir = dir_changed(item, next)
+            if dir is not None:
+                result.append(dir)
+
+        except IndexError:
+            break
+
+    return result
+
+def getPaths(start_pos, end_pos):
+    move = end_pos[0] - start_pos[0], end_pos[1] - start_pos[1]
+
+    path = []
+    
+    if move[0] > 0:  # x
+        path.extend("e" * move[0])
+    elif move[0] < 0:
+        path.extend("w" * -move[0])
         
-        paths.append(path)
-        grid = [[(x, y) if (x, y) != path[-1] else (None, None) for x, y in row] for row in grid]
+    if move[1] > 0:  # y
+        path.extend("n" * move[1])
+    elif move[1] < 0:
+        path.extend("s" * -move[1])
 
-    return paths
+    all_paths = list(set(  # 중복 제거
+            permutations(path, len(path))))
 
-# Example usage (same as before)
-grid = [[(0, 0), (0, 1), (0, 2)],
-        [(1, 0), (1, 1), (1, 2)],
-        [(2, 0), (2, 1), (2, 2)]]
+    for i, lis in enumerate(all_paths):
+        all_paths[i] = add_direction(lis)
 
-start_points = [(1, 0), (2, 0), (2, 0)]
-end_points = [(1, 2), (0, 0), (0, 0)]
+    sorted_paths = sorted(all_paths, key=len)
+    return sorted_paths
 
-ideal_paths = find_ideal_paths(grid, start_points, end_points)
-if ideal_paths:
-    for i, path in enumerate(ideal_paths):
-        print(f"Dot {chr(65 + i)} path:", path)
-else:
-    print("No valid paths found.")
+def toPos(start_pos, path):
+    x, y = start_pos
+    result = [(x, y)]
+    
+    for dir in path:
+        if dir == "n":
+            result.append((x, y + 1))
+        elif dir == "e":
+            result.append((x + 1, y))
+        elif dir == "s":
+            result.append((x, y - 1))
+        elif dir == "w":
+            result.append((x - 1, y))
+        else:  # l90 or r90
+            result.append(dir)
+            continue
+        
+        x, y = result[-1]
+    
+    return result
+
+
