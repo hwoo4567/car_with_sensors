@@ -55,13 +55,14 @@ class CarOptions(Frame):
             
 
 class AppUI(Frame):
-    def __init__(self, parent: Tk):
+    def __init__(self, parent: Tk, gird_size):
         Frame.__init__(self, parent)
         matplotlib.use("TkAgg", force=True)
         
         self.parent = parent
         self.registered_cars: List[Car] = []
         self.loop_func = None  # loop event
+        self.grid_x, self.grid_y = gird_size
         
         self.initVar()
         self.initUI()
@@ -95,26 +96,28 @@ class AppUI(Frame):
     def updatePoints(self, frame):
         self.ax.clear()  # Clear the previous frame
         # Draw the grid
-        for x in range(6):
+        for x in range(self.grid_x + 1):
             self.ax.axvline(x, color='gray', linestyle='--', linewidth=1)
             self.ax.axhline(x, color='gray', linestyle='--', linewidth=1)
         
-        # Generate random dot positions
-        dot_positions = [
-            car.getPos()
-            for car in self.registered_cars
-        ]
-        
         # Draw dots at the randomly generated positions
-        for dot_x, dot_y in dot_positions:
-            self.ax.plot(dot_x, dot_y, 'ro')  # 'ro' means red circle marker
-            self.ax.text(dot_x, dot_y + 0.15, f'({dot_x}, {dot_y})', ha='center', va='bottom', fontsize=16)
+        for car in self.registered_cars:
+            pos_x, pos_y = car.getPos()
+            name = car.name
+            color = car.color
+            dest_pos_lis = [item for item in car.getDest() if isinstance(item, tuple)]
+            dot_x = [i[0] for i in dest_pos_lis]
+            dot_y = [i[1] for i in dest_pos_lis]
+            
+            self.ax.plot(dot_x, dot_y, f'{color}-')
+            self.ax.plot(pos_x, pos_y, f'{color}o')  # 'ro' means red circle marker
+            self.ax.text(pos_x, pos_y + 0.15, f'{name}\n({pos_x}, {pos_y})', ha='center', va='bottom', fontsize=16)
         
         # Set limits and labels
-        self.ax.set_xlim(0, 3)
-        self.ax.set_ylim(0, 3)
-        self.ax.set_xticks(range(1, 4))
-        self.ax.set_yticks(range(1, 4))
+        self.ax.set_xlim(0, self.grid_x)
+        self.ax.set_ylim(0, self.grid_y)
+        self.ax.set_xticks(range(1, self.grid_x + 1))
+        self.ax.set_yticks(range(1, self.grid_y + 1))
         self.ax.set_aspect('equal')  # Ensure equal aspect ratio
         
         self.ax.set_xlabel('X')
@@ -134,17 +137,26 @@ class AppUI(Frame):
         )
         def up(option: CarOptions):
             self.car_options.remove(option)
+            self.registered_cars.remove(car)
             self.car_options.insert(0, option)
+            self.registered_cars.insert(0, car)
             self.update_car_options()
+            
         def down(option: CarOptions):
             self.car_options.remove(option)
+            self.registered_cars.remove(car)
             self.car_options.append(option)
+            self.registered_cars.append(car)
             self.update_car_options()
             
         self.car_options[-1].setButtonFuncs(up, down)
         self.update_car_options()
         
     def update_car_options(self):
+        # for i in range(min( [len(car) for car in self.registered_cars] )):
+        #     for dest in [car.getDest() for car in self.registered_cars]:
+        #         dest[i]
+
         for car, option in zip(self.registered_cars, self.car_options):
             option.pack_forget()
             option.pack(side="top", fill="x", padx=10, pady=5)

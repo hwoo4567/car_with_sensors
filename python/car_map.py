@@ -1,6 +1,7 @@
 import socket
 import threading
 import ui
+import path_search as ps
 
 # 센서 값을 한 번에 받도록 프로그래밍 하는 것이 좋을 것 같다.
 # 자동차가 항상 위를 보고 있다고 가정 
@@ -14,15 +15,15 @@ ADDRESS = {
 class Car:
     port = 1
 
-    def __init__(self, name, mac_address=None):
+    def __init__(self, name, color, mac_address=None):
         self.address = mac_address
         self._name = name
+        self._color = color  # r, g, b ...
         self._path = "..."
         self.driving = False
         
         self.x, self.y = 0, 0  # 0 - 5
-        self.light_sensor = 0.0
-        self.distance = 0.0
+        self.dest_x, self.dest_y = 0, 0
         
         if mac_address is not None:
             self.socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
@@ -34,19 +35,32 @@ class Car:
     def getPos(self):
         return self.x, self.y
     
+    def setDest(self, x, y):
+        self.dest_x, self.dest_y = x, y
+        self.paths = []
+        for path in ps.getPaths((self.x, self.y), (self.dest_x, self.dest_y)):
+            self.paths.append(ps.toPos((self.x, self.y), path))
+        
+        self.path_index = 0
+
+        print(self.name, self.getDest())
+        
+    def getDest(self) -> list[tuple, str]:
+        return self.paths[self.path_index]
+    
+    def nextDest(self):
+        self.path_index += 1
+        
     # /////////////////////////////////////////////////////
     @property
     def path(self):
         return self._path
-    @path.setter
-    def path(self, p):
-        self._path = p
     @property
     def name(self):
         return self._name
-    @name.setter
-    def name(self, name):
-        self._name = name
+    @property
+    def color(self) -> str:
+        return self._color
     
     def send(self, msg: str):
         self.socket.send(bytes(msg, "ascii"))
@@ -81,18 +95,29 @@ class Car:
                 
 import random
 def communication():
-    car1 = Car("Test Car 1", ADDRESS[1])
-    car2 = Car("Test Car 2", ADDRESS[2])
-    car3 = Car("Test Car 3", ADDRESS[3])
+    # car1 = Car("Test Car 1", ADDRESS[1])
+    # car2 = Car("Test Car 2", ADDRESS[2])
+    # car3 = Car("Test Car 3", ADDRESS[3])
 
+    car1 = Car("Test Car 1", "r", None)
+    car2 = Car("Test Car 2", "g", None)
+    car3 = Car("Test Car 3", "b", None)
+    
+    car1.setPos(0, 0)
+    car2.setPos(3, 2)
+    car3.setPos(1, 3)
+    
+    car1.setDest(3, 3)
+    car2.setDest(0, 0)
+    car3.setDest(0, 0)
+        
     for car in (car1, car2, car3):
-        car.setPos(random.randint(0, 3), random.randint(0, 3))
         app.register_car(car)
     
 def appDef():
     global app, root
     root = ui.Tk()
-    app = ui.AppUI(root)
+    app = ui.AppUI(root, (4, 3))
     app.pack(fill="both", expand=True)
 
 if __name__ == "__main__":

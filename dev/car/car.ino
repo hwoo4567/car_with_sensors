@@ -5,9 +5,9 @@
 
 #define TEST_LIGHT
 // #define TEST_DRIVE
+#define LIGHT_SENSOR_ON  // 빛 센서를 사용한 자동차 정지 기능, 불 끄고 어두운 환경에서 써야 함
 
 #define LINE_SENSOR_THRESHOLD 400  // 검은색-하얀색 구분 임계값
-// 불 끄고 어두운 환경에서 써야 함
 #define LIGHT_VALUE_THRESHOLD 100  // 빛 감지 임계값
 #define DEFUALT_SPEED         200
 
@@ -34,7 +34,6 @@ int* turn_code = nullptr;
  * ex)
  * motor_l->setSpeed(speed_l - 30);  // 속도를 30 줄인다
 */
-bool requested = false;
 void adjustMotor(AF_DCMotor* motor_l, AF_DCMotor* motor_r) {
     int lineL = getLineLSensorVal();
     int lineR = getLineRSensorVal();
@@ -81,9 +80,11 @@ void checkSensor() {
         motorStop();
     }
 
-    // if (isDriving() && brightness > LIGHT_VALUE_THRESHOLD) {
-    //     main_timer->after(500, motorStop);
-    // }
+#ifdef LIGHT_SENSOR_ON
+    if (isDriving() && brightness > LIGHT_VALUE_THRESHOLD) {
+        main_timer->after(500, motorStop);
+    }
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -125,11 +126,6 @@ void loop() {
         Serial.println("Connected");
 
         bt_input = BtSerial.readString();
-
-        if (bt_input.startsWith("[res] ")) {
-            bt_input.replace("[res] ", "");
-            requested = false;  // it can request next
-        }
         
         if (bt_input != "") {
             runString(bt_input, response);

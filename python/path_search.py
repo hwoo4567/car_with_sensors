@@ -1,6 +1,6 @@
 from itertools import permutations
 
-def dir_changed(now, next):
+def dir_changed(now, next):  # return: direction
     r = "neswn"
     
     if r.find(now + next) != -1:
@@ -26,7 +26,7 @@ def add_direction(lst):
 
     return result
 
-def getPaths(start_pos, end_pos):
+def getPaths(start_pos, end_pos) -> list[list[str]]:
     move = end_pos[0] - start_pos[0], end_pos[1] - start_pos[1]
 
     path = []
@@ -50,7 +50,7 @@ def getPaths(start_pos, end_pos):
     sorted_paths = sorted(all_paths, key=len)
     return sorted_paths
 
-def toPos(start_pos, path):
+def toPos(start_pos, path) -> list[tuple, str]:
     x, y = start_pos
     result = [(x, y)]
     
@@ -72,3 +72,5 @@ def toPos(start_pos, path):
     return result
 
 
+if __name__ == "__main__":
+    print(getPaths((0, 0), (3, 4)))
