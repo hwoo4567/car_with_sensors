@@ -13,7 +13,9 @@ enum Cmd {
     Go,
     Speed,
     Turn,
+    Turn90,
     Sensor,
+    SAY,
 };
 
 void commandInit(Timer* timer);

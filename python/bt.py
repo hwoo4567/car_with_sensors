@@ -1,40 +1,39 @@
 """
-pip install pybluez2
-
-pip install bleak
-
 """
 
 import socket
-import asyncio
+import threading
+import sys
 
-address = "00:22:09:01:FE:87"
+ADDRESS = {
+    1: "00:22:09:01:F8:C5",
+    2: "00:22:09:01:FE:87",
+    3: "00:22:09:01:FD:57",
+}
 
-async def main_async():
-    while True:
-        if await send() == "q":
-            break
-        await receive()
-    
-async def send():
+def send():
     global s
-    msg = input("send message : ")
+    msg = input()
     if msg == "q":
         return "q"
     
     s.send(bytes(msg, 'utf-8'))
 
-async def receive():
+def receive():
     global s
-    data = s.recv(1024)
-    print("Received: [%s]" % data.decode("utf-8").replace("\n", "\\n").replace("\r", "\\r"))
+    while True:
+        data = s.recv(1024)
+        print("Received: [%s]" % data.decode("utf-8").replace("\n", "\\n").replace("\r", "\\r"))
     
 with socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM) as s:
-    s.connect((address, 1))
+    s.connect((ADDRESS[int(sys.argv[1])], 1))
     print("bluetooth connected!")
-    
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main_async())
-    loop.close()
-    
+
+    t1 = threading.Thread(target=receive)
+    t1.daemon = True
+    t1.start()
+    while True:
+        if send() == "q":
+            break
+
     print("finished")

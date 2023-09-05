@@ -20,7 +20,7 @@ void stop(String args[]) {
     _stopAll();
 }
 
-void go(String args[]) {
+String go(String args[]) {
     _stopAll();
 
     if (args[0] == "forward") {
@@ -35,11 +35,14 @@ void go(String args[]) {
     if (move_millisec > 0) {
         *prevMoveCmdId = main_timer->after(move_millisec, _stopAll);
     }
+
+    return String(isDriving());
 }
 
-void speed(String args[]) {
+String speed(String args[]) {
     int val = args[0].toInt();
     motorSetSpeed( (val <= 255 && val >= 0) ? val : 0 );
+    return String("Speed: ") + String(speed_l) + " " + String(speed_r);
 }
 
 void turn(String args[]) {
@@ -48,31 +51,43 @@ void turn(String args[]) {
     if (args[0] == "left") {
         motorTurn(LEFT);
     }
-    if (args[0] == "right") {
+    else if (args[0] == "right") {
         motorTurn(RIGHT);
-    }
-
-    // .toInt() : 숫자로 시작되지 않거나 값이 0일 때 return 0;
-    int move_millisec = args[1].toInt();
-    if (move_millisec > 0) {
-        *prevMoveCmdId = main_timer->after(move_millisec, _stopAll);
     }
 }
 
-double sensor(String args[]) {
-    if (args[0] == "light") {
-        return getLightVal();
+void turn90(String args[]) {
+    _stopAll();
+
+    if (args[0] == "left") {
+        motorTurn(LEFT);
     }
-    if (args[0] == "lineL") {
-        return getLineLSensorVal();
+    else if (args[0] == "right") {
+        motorTurn(RIGHT);
     }
-    if (args[0] == "lineR") {
-        return getLineRSensorVal();
+
+    *prevMoveCmdId = main_timer->after(TURNING_TIME, _stopAll);
+}
+
+String sensor(String args[]) {
+    String result = "";
+
+    result += String(getDistance()) + " ";
+    result += String(getLightVal()) + " ";
+    result += String(getLineLSensorVal()) + " ";
+    result += String(getLineRSensorVal());
+
+    return result;
+}
+
+String say(String args[]) {
+    String result;
+
+    for (uint8_t i = 0; i < MAX_COMMAND_ARG; i++) {
+        result += args[i] + " ";
     }
-    if (args[0] == "distance") {
-        return getDistance();
-    }
-    return 0.0;
+
+    return result;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -89,38 +104,52 @@ void runCommand(Cmd cmd, String args[], String& response) {
         stop(args);
         break;
     case Go:
-        go(args);
+        response = go(args);
         break;
     case Speed:
-        speed(args);
+        response = speed(args);
         break;
     case Turn:
         turn(args);
         break;
-    case Sensor:
-        double value = sensor(args);
-        response = String(value);
+    case Turn90:
+        turn90(args);
         break;
+    case Sensor:
+        response = sensor(args);
+        break;
+    case SAY:
+        response = say(args);
     default:
         break;
     }
 }
 
+inline bool strEquals(const char* a, const char* b) {
+    return strcmp(a, b) == 0;
+}
+
 Cmd _charToCmd(const char* input) {
-    if (strcmp(input, "stop") == 0) {
+    if (strEquals(input, "stop")) {
         return Cmd::Stop;
     }
-    else if (strcmp(input, "go") == 0) {
+    else if (strEquals(input, "go")) {
         return Cmd::Go;
     }
-    else if (strcmp(input, "speed") == 0) {
+    else if (strEquals(input, "speed")) {
         return Cmd::Speed;
     }
-    else if (strcmp(input, "turn") == 0) {
+    else if (strEquals(input, "turn")) {
         return Cmd::Turn;
     }
-    else if (strcmp(input, "sensor") == 0) {
+    else if (strEquals(input, "turn90")) {
+        return Cmd::Turn90;
+    }
+    else if (strEquals(input, "sensor")) {
         return Cmd::Sensor;
+    }
+    else if (strEquals(input, "say")) {
+        return Cmd::SAY;
     }
     return Cmd::Null;
 }

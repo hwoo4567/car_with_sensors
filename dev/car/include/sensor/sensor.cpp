@@ -1,5 +1,5 @@
 #include "sensor.h"
-#define UPDATE_INTERVAL 100  // ms
+#define UPDATE_INTERVAL 10  // ms
 
 // Sensors for line tracing
 uint8_t _line_l_pin, _line_r_pin;

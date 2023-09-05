@@ -3,7 +3,14 @@ import threading
 import ui
 
 # 센서 값을 한 번에 받도록 프로그래밍 하는 것이 좋을 것 같다.
-# 자동차가 항상 위를 보고 있다고 가정   
+# 자동차가 항상 위를 보고 있다고 가정 
+
+ADDRESS = {
+    1: "00:22:09:01:F8:C5",
+    2: "00:22:09:01:FE:87",
+    3: "00:22:09:01:FD:57",
+}
+
 class Car:
     port = 1
 
@@ -71,12 +78,13 @@ class Car:
             print("Received: !!Error!!")
         finally:
             return string_data
-        
+                
 import random
 def communication():
-    car1 = Car("Test Car 1")  # "00:22:09:01:FE:87"
-    car2 = Car("Test Car 2")
-    car3 = Car("Test Car 3")
+    car1 = Car("Test Car 1", ADDRESS[1])
+    car2 = Car("Test Car 2", ADDRESS[2])
+    car3 = Car("Test Car 3", ADDRESS[3])
+
     for car in (car1, car2, car3):
         car.setPos(random.randint(0, 3), random.randint(0, 3))
         app.register_car(car)
@@ -89,7 +97,7 @@ def appDef():
 
 if __name__ == "__main__":
     t1 = threading.Thread(target=communication)
-    t1.daemon = True 
+    t1.daemon = True
     appDef()
     t1.start()
     root.mainloop()

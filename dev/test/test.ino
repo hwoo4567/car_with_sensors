@@ -24,7 +24,6 @@ void SerialPrintf(const char *s, ...){
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
-    pinMode(led_blue, OUTPUT);
 
     Serial.begin(9600);
 }
@@ -40,12 +39,6 @@ void loop() {
         digitalWrite(LED_BUILTIN, HIGH);
     } else {
         digitalWrite(LED_BUILTIN, LOW);
-    }
-
-    if (val2 > THRESHOLD) {
-        digitalWrite(led_blue, HIGH);
-    } else {
-        digitalWrite(led_blue, LOW);
     }
 
     delay(100);

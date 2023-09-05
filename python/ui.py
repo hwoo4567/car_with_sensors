@@ -40,12 +40,7 @@ class CarOptions(Frame):
         right_frame.pack(side="right", fill="both", expand=True)
         
         CarOptions.setBgColor(self)
-        
-    def setTitle(self, txt):
-        self.path_text.config(text=txt)
-    def setPath(self, txt):
-        self.path_text.config(text=txt)
-            
+           
     def setButtonFuncs(self, onUp, onDown):
         self.up_button.config(command=lambda: onUp(self))
         self.down_button.config(command=lambda: onDown(self))
@@ -151,8 +146,6 @@ class AppUI(Frame):
         
     def update_car_options(self):
         for car, option in zip(self.registered_cars, self.car_options):
-            option.setTitle(car.name)
-            option.setPath(car.path)
             option.pack_forget()
             option.pack(side="top", fill="x", padx=10, pady=5)
 
