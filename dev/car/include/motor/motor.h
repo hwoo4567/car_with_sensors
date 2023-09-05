@@ -14,7 +14,7 @@
 #define RIGHT          1
 
 // 회전할 때 걸리는 시간 (ms)
-#define TURNING_TIME   600
+#define TURNING_TIME   700
 
 /*
 Declaration:
